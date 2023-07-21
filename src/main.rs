@@ -1,36 +1,50 @@
+use clap::Parser;
 use git2::Repository;
+
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::process::Command;
 
+#[derive(Parser)]
+struct Cli {
+    build: String,
+    #[arg(short, long, default_value_t = false)]
+    dry_run: bool,
+}
+
 fn main() {
-    let build = std::env::args().last();
-    let pr_msg = create_pr_msg(build.unwrap());
+    let cli = Cli::parse();
+
+    let build = cli.build;
+
+    let pr_msg = create_pr_msg(build);
     println!("{pr_msg}");
 
-    let output = Command::new("gh")
-        .arg("pr")
-        .arg("create")
-        .arg("--fill")
-        .arg("--body")
-        .arg(pr_msg.clone())
-        .output()
-        .expect("failed to execute process");
-    io::stdout().write_all(&output.stdout).unwrap();
-    io::stderr().write_all(&output.stderr).unwrap();
-
-    let stderr = String::from_utf8(output.stderr).expect("whoopps");
-    if stderr.contains("already exists") {
-        println!("sup");
+    if !cli.dry_run {
         let output = Command::new("gh")
             .arg("pr")
-            .arg("edit")
+            .arg("create")
+            .arg("--fill")
             .arg("--body")
-            .arg(pr_msg)
+            .arg(pr_msg.clone())
             .output()
             .expect("failed to execute process");
         io::stdout().write_all(&output.stdout).unwrap();
         io::stderr().write_all(&output.stderr).unwrap();
+
+        let stderr = String::from_utf8(output.stderr).expect("whoopps");
+        if stderr.contains("already exists") {
+            println!("sup");
+            let output = Command::new("gh")
+                .arg("pr")
+                .arg("edit")
+                .arg("--body")
+                .arg(pr_msg)
+                .output()
+                .expect("failed to execute process");
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
+        }
     }
 }
 
