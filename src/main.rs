@@ -21,6 +21,7 @@ fn main() {
 
     let stderr = String::from_utf8(output.stderr).expect("whoopps");
     if stderr.contains("already exists") {
+        println!("sup");
         let output = Command::new("gh")
             .arg("pr")
             .arg("edit")
@@ -37,11 +38,11 @@ fn create_pr_msg(build: String) -> String {
     let mut repo2staging: HashMap<&str, &str> = HashMap::default();
     repo2staging.insert(
         "cloud-docs",
-        "https://docs-atlas-staging.mongodb.com/cloud-docs/docsworker-xlarge",
+        "https://docs-atlas-staging.mongodb.com/cloud-docs/docsworker-xlarge/",
     );
     repo2staging.insert(
         "mms-docs",
-        "https://docs-opsmanager-staging.mongodb.com/docsworker-xlarge",
+        "https://docs-opsmanager-staging.mongodb.com/docsworker-xlarge/",
     );
 
     // Get repo workdir
@@ -79,11 +80,11 @@ fn create_pr_msg(build: String) -> String {
     let diff = Command::new("git")
         .arg("diff")
         .arg("--name-only")
-        .arg("master")
+        .arg("upstream/master")
         .output()
         .expect("failed to execute process");
     let diff = String::from_utf8(diff.stdout).expect("whoops");
-    let diff_files: Vec<&str> = diff.split("\n").collect();
+    let diff_files: Vec<&str> = diff.trim_end().split("\n").collect();
     let diff_files: Vec<_> = diff_files
         .iter()
         .map(|s| s.replace("source/", ""))
@@ -96,7 +97,7 @@ fn create_pr_msg(build: String) -> String {
     // Build PR msg
     let mut pr_msg = String::from(format!("- {branch}\n- Staging:"));
     for file in diff_files {
-        pr_msg.push_str(&format!("\n  - {staging_base}/{branch}/{file}"));
+        pr_msg.push_str(&format!("\n  - {staging_pr_base}/{file}"));
     }
 
     pr_msg.push_str(&format!("\n- Build log: {build}"));
