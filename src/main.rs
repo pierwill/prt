@@ -1,6 +1,6 @@
 use git2::Repository;
 use std::collections::HashMap;
-use std::io;
+use std::io::{self, Write};
 use std::process::Command;
 
 const DEBUG: bool = true;
@@ -56,15 +56,18 @@ fn main() {
         .expect("failed to execute process");
     let diff = String::from_utf8(diff.stdout).expect("whoops");
     let diff_files: Vec<&str> = diff.split("\n").collect();
-    let diff_files: Vec<&str> = diff_files
+    let diff_files: Vec<_> = diff_files
         .iter()
-        .map(|s| s.replace("source/", "").strip_suffix(".txt").unwrap())
+        .map(|s| s.replace("source/", ""))
+        .map(|s| s.replace(".txt", ""))
+        .map(|s| s.replace(".rst", ""))
+        .map(|s| s.replace(".yaml", ""))
+        .filter(|s| !s.contains("includes"))
         .collect();
 
     // Get build log
-    let build = "";
+    let mut build = String::new();
     if !DEBUG {
-        let mut build = String::new();
         println!("Input build log link: ");
         io::stdin()
             .read_line(&mut build)
@@ -79,4 +82,17 @@ fn main() {
 
     pr_msg.push_str(&format!("\n- Build log: {build}"));
     println!("{}", pr_msg);
+
+    let output = Command::new("gh")
+        .arg("pr")
+        .arg("create")
+        .arg("--fill")
+        .arg("--body")
+        .arg(pr_msg)
+        .output()
+        .expect("failed to execute process");
+
+    println!("status: {}", output.status);
+    io::stdout().write_all(&output.stdout).unwrap();
+    io::stderr().write_all(&output.stderr).unwrap();
 }
