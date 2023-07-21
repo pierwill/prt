@@ -6,6 +6,24 @@ use std::process::Command;
 const DEBUG: bool = true;
 
 fn main() {
+    let pr_msg = create_pr_msg();
+    println!("{pr_msg}");
+
+    if !DEBUG {
+        let output = Command::new("gh")
+            .arg("pr")
+            .arg("create")
+            .arg("--fill")
+            .arg("--body")
+            .arg(pr_msg)
+            .output()
+            .expect("failed to execute process");
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+    }
+}
+
+fn create_pr_msg() -> String {
     let mut repo2staging: HashMap<&str, &str> = HashMap::default();
     repo2staging.insert(
         "cloud-docs",
@@ -72,7 +90,7 @@ fn main() {
         io::stdin()
             .read_line(&mut build)
             .expect("Failed to read line");
-    };
+    }
 
     // Build PR msg
     let mut pr_msg = String::from(format!("- {branch}\n- Staging:"));
@@ -81,18 +99,5 @@ fn main() {
     }
 
     pr_msg.push_str(&format!("\n- Build log: {build}"));
-    println!("{}", pr_msg);
-
-    let output = Command::new("gh")
-        .arg("pr")
-        .arg("create")
-        .arg("--fill")
-        .arg("--body")
-        .arg(pr_msg)
-        .output()
-        .expect("failed to execute process");
-
-    println!("status: {}", output.status);
-    io::stdout().write_all(&output.stdout).unwrap();
-    io::stderr().write_all(&output.stderr).unwrap();
+    pr_msg
 }
