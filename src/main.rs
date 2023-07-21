@@ -34,7 +34,6 @@ fn main() {
 
         let stderr = String::from_utf8(output.stderr).expect("whoopps");
         if stderr.contains("already exists") {
-            println!("sup");
             let output = Command::new("gh")
                 .arg("pr")
                 .arg("edit")
@@ -115,7 +114,6 @@ fn create_pr_msg(build: String) -> String {
     for file in diff_files {
         pr_msg.push_str(&format!("\n  - {staging_pr_base}/{file}"));
     }
-
     pr_msg.push_str(&format!("\n- Build log: {build}"));
     pr_msg
 }
