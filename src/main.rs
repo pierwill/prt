@@ -3,17 +3,27 @@ use std::collections::HashMap;
 use std::io::{self, Write};
 use std::process::Command;
 
-const DEBUG: bool = true;
-
 fn main() {
-    let pr_msg = create_pr_msg();
+    let build = std::env::args().last();
+    let pr_msg = create_pr_msg(build.unwrap());
     println!("{pr_msg}");
 
-    if !DEBUG {
+    let output = Command::new("gh")
+        .arg("pr")
+        .arg("create")
+        .arg("--fill")
+        .arg("--body")
+        .arg(pr_msg.clone())
+        .output()
+        .expect("failed to execute process");
+    io::stdout().write_all(&output.stdout).unwrap();
+    io::stderr().write_all(&output.stderr).unwrap();
+
+    let stderr = String::from_utf8(output.stderr).expect("whoopps");
+    if stderr.contains("already exists") {
         let output = Command::new("gh")
             .arg("pr")
-            .arg("create")
-            .arg("--fill")
+            .arg("edit")
             .arg("--body")
             .arg(pr_msg)
             .output()
@@ -23,7 +33,7 @@ fn main() {
     }
 }
 
-fn create_pr_msg() -> String {
+fn create_pr_msg(build: String) -> String {
     let mut repo2staging: HashMap<&str, &str> = HashMap::default();
     repo2staging.insert(
         "cloud-docs",
@@ -82,15 +92,6 @@ fn create_pr_msg() -> String {
         .map(|s| s.replace(".yaml", ""))
         .filter(|s| !s.contains("includes"))
         .collect();
-
-    // Get build log
-    let mut build = String::new();
-    if !DEBUG {
-        println!("Input build log link: ");
-        io::stdin()
-            .read_line(&mut build)
-            .expect("Failed to read line");
-    }
 
     // Build PR msg
     let mut pr_msg = String::from(format!("- {branch}\n- Staging:"));
