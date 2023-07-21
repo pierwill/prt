@@ -101,11 +101,13 @@ fn create_pr_msg(build: String) -> String {
     let diff_files: Vec<&str> = diff.trim_end().split("\n").collect();
     let diff_files: Vec<_> = diff_files
         .iter()
+        .filter(|s| s.contains("source"))
+        .filter(|s| !s.contains("includes"))
         .map(|s| s.replace("source/", ""))
         .map(|s| s.replace(".txt", ""))
         .map(|s| s.replace(".rst", ""))
         .map(|s| s.replace(".yaml", ""))
-        .filter(|s| !s.contains("includes"))
+        .map(|s| s.replace(".toml", ""))
         .collect();
 
     // Build PR msg
