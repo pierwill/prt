@@ -18,7 +18,7 @@ When you're done working, and you have a build log URL, you can run `prt '<build
 
 # Install
 
-You will need to (install Rust)[https://www.rust-lang.org/tools/install].
+You will need to [install Rust](https://www.rust-lang.org/tools/install).
 
 1. Download this repo.
 2. `cd prt/`
