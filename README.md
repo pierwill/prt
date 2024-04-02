@@ -4,8 +4,8 @@
 
 Let's say you have a branch named `DOCSP-99999-hello`. (The `hello` suffix is fine to have.)
 
-When you're done working, and you have a build log URL, you can run `prt <build log URL`
-and get a PR message that looks like this:
+When you're done working, and you have a build log URL, you can run `prt '<build log URL>'`
+(make sure to use quotes around the URL) and get a PR message that looks like this:
 
 ```
 - DOCSP-38030
