@@ -107,8 +107,12 @@ fn create_pr_msg(build: String) -> String {
         .map(|s| s.replace(".toml", ""))
         .collect();
 
+    // Remove branch suffix from Jira number
+    let jira_number: Vec<&str> = branch.splitn(3, '-').take(2).collect();
+    let jira_number = jira_number.join("-");
+
     // Build PR msg
-    let mut pr_msg = String::from(format!("- {branch}\n- Staging:"));
+    let mut pr_msg = String::from(format!("- {jira_number}\n- Staging:"));
     for file in diff_files {
         pr_msg.push_str(&format!("\n  - {staging_pr_base}/{file}"));
     }
