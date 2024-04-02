@@ -8,9 +8,13 @@ use std::process::Command;
 #[derive(Parser)]
 struct Cli {
     build: String,
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long, default_value_t = true)]
     dry_run: bool,
 }
+
+const CLOUD_DOCS_STAGING_BASE_URL: &str = "https://preview-mongodbpierwill.gatsbyjs.io/cloud-docs/";
+const MMS_DOCS_STAGING_BASE_URL: &str =
+    "https://docs-opsmanager-staging.mongodb.com/docsworker-xlarge/";
 
 fn main() {
     let cli = Cli::parse();
@@ -49,14 +53,8 @@ fn main() {
 
 fn create_pr_msg(build: String) -> String {
     let mut repo2staging: HashMap<&str, &str> = HashMap::default();
-    repo2staging.insert(
-        "cloud-docs",
-        "https://docs-atlas-staging.mongodb.com/cloud-docs/docsworker-xlarge/",
-    );
-    repo2staging.insert(
-        "mms-docs",
-        "https://docs-opsmanager-staging.mongodb.com/docsworker-xlarge/",
-    );
+    repo2staging.insert("cloud-docs", CLOUD_DOCS_STAGING_BASE_URL);
+    repo2staging.insert("mms-docs", MMS_DOCS_STAGING_BASE_URL);
 
     // Get repo workdir
     let repo = match Repository::open(".") {
