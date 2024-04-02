@@ -28,3 +28,7 @@ You will need to [install Rust](https://www.rust-lang.org/tools/install).
 1. Download this repo.
 2. `cd prt/`
 3. `cargo install --path .`
+
+# Configure
+
+Go into the `main.rs` file and change the `CLOUD_DOCS_STAGING_BASE_URL` for your own staging links.
