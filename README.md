@@ -32,3 +32,7 @@ You will need to [install Rust](https://www.rust-lang.org/tools/install).
 # Configure
 
 Go into the `main.rs` file and change the `CLOUD_DOCS_STAGING_BASE_URL` for your own staging links.
+
+# Limitations
+
+Only works for `cloud-docs` right now.
